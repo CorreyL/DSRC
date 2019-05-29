@@ -312,7 +312,7 @@ void HuffmanEncoder::Restart(uint32 _size)
 			codes = new Code[2*size-1];
 			heap  = new Frequency[size];
 			tree  = new Node[2*size-1];
-			delete tmp;
+			delete[] tmp;
 		}
 		else
 		{

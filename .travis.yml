@@ -1,0 +1,8 @@
+dist: xenial
+
+language: cpp
+
+compiler: gcc
+
+script:
+  - bash travis_build.sh
