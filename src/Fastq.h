@@ -34,10 +34,10 @@ struct FastqRecord
 	uchar *sequence;
 	uchar *quality;
 
-	uint16 titleLen;
-	uint16 sequenceLen;		// can be specialized
-	uint16 qualityLen;		// can be specialized
-	uint16 truncatedLen;	// can be specialized
+	uint32 titleLen;
+	uint32 sequenceLen;
+	uint32 qualityLen;
+	uint32 truncatedLen;
 
 	FastqRecord()
 		:	title(NULL)

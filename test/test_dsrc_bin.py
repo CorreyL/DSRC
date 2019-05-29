@@ -4,7 +4,7 @@ import os
 import sys
 
 # set this up to a local DSRC binary
-dsrc_exec = "./dsrc"
+dsrc_exec = "./bin/dsrc"
 
 
 # command patterns to be executed
@@ -23,12 +23,14 @@ class RunException(Exception):
     def __str__(self):
         return repr(self.msg)
 
+
 def run_cmd(cmd_):
     # TODO: this one should be done using subprocess module, 
     # but handling properly both stdout/stdin and stderr is a mess...
     ret = os.system(cmd_)
     if ret != 0:
-        raise RunException("Error running command: %s (exit status: $d)" % (cmd_, ret))
+        raise RunException("Error running command: %s (exit status: %d)" % (cmd_, ret))
+
 
 def perform_test(params_, infile_, checkOutput_ = True, usesStdio_ = False):
     dsrc_tmp_file = "__out.dsrc"
@@ -73,8 +75,10 @@ def perform_test(params_, infile_, checkOutput_ = True, usesStdio_ = False):
     
     except RunException as exc:
         print "FAIL: " + str(exc)
+        test_passed = False
     else:
         print "PASS"
+        test_passed = True
     
     # tear-down : cleanup
     #
@@ -83,26 +87,42 @@ def perform_test(params_, infile_, checkOutput_ = True, usesStdio_ = False):
 
     if os.path.isfile(fastq_tmp_file):
         os.remove(fastq_tmp_file)
+
+    return test_passed
     
 
-def run_tests(infile_):
-    
-    if not os.path.isfile(infile_):
-        print "Error: input file does not exist: " + infile_
+def run_tests(dir_):
+
+    if not os.path.isdir(dir_):
+        print "Error: input directory does not exist: " + infile_
         return
     
-    print "Running tests on %s file..." % infile_
-    
-    # simple test : only lossless mode
-    #
-    for th in ["-t1", "-t4"]:
-        for m in ["-m0", "-m1", "-m2"]:
-            params = "%s %s" % (th, m)
-            print "**** Running case: (%s + file+file) ****" % params 
-            perform_test(params, infile_, True)
-            print "**** Running case: (%s + file+stdio) ****" % params 
-            perform_test(params, infile_, True, True)
+    tests_results = []
+    for fq_file in os.listdir(dir_):
+        fq_file_path = os.path.join(dir_, fq_file)
+        if not os.path.isfile(fq_file_path):
+            continue
+
+        print "****************************************************************"
+        print "*"
+        print "* Running tests on %s file..." % fq_file
+        
+        # simple test : only lossless mode
+        #
+        for th in ["-t1", "-t4"]:
+            for m in ["-m0", "-m1", "-m2"]:
+                params = "%s %s" % (th, m)
+                print "** Running case: (%s + file+file) ****" % params 
+                test_f2f_passed = perform_test(params, fq_file_path, True)
+
+                print "** Running case: (%s + file+stdio) ****" % params 
+                test_f2s_passed = perform_test(params, fq_file_path, True, True)
+
+                tests_results.append((fq_file, th, m, test_f2f_passed))
+                tests_results.append((fq_file, th, m, test_f2s_passed))
             
+    return tests_results
+
     # TODO: exhaustive test
     # * different compression modes + buffer sizes
     # * lossy quality mode
@@ -112,7 +132,37 @@ def run_tests(infile_):
 
 if __name__ == "__main__":
     if len(sys.argv) != 2 or "-h" in sys.argv[1]:
-        print "usage: test_dsrc_bin.py <FASTQ filename>"
+        print "usage: test_dsrc_bin.py <directory>"
         exit(0)
-        
-    run_tests(sys.argv[1])
+    
+    print "****************************************************************"
+    print "*"
+    print "* STARTING TESTS"
+    print "*"
+    tests_results = run_tests(sys.argv[1])
+
+    # check for failed tests
+    #
+    failed_tests = [t for t in tests_results if t[3] == False]
+
+    # print results
+    #
+    print "****************************************************************"
+    print "*"
+    print "* SUMMARY"
+    print "*"
+    print "****************************************************************"
+    print "Total tests: %d" % len(tests_results)
+    print "Passed tests %d" % (len(tests_results) - len(failed_tests))
+
+    if len(failed_tests) > 0:
+        failed_files = set([t[0] for t in failed_tests])
+        print "Failed tests: %d" % len(failed_tests)
+        for f in failed_files:
+            print "** File: %s" % f
+
+        # in case of failed tests return non-zero value 
+        exit(-1)
+
+    # return success
+    exit(0)
