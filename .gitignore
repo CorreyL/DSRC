@@ -1,3 +1,10 @@
+# The next three lines of code ensures Linux binary executable files are ignored
+# Ignore everything
+*
+# DO NOT blacklist any directories
+!*/
+# DO NOT blacklist any filename with an extension
+!*.*
 .DS_Store
 *.o
 bin/
