@@ -1,5 +1,8 @@
 #include "../include/dsrc/DsrcInMemory.h"
 
+#include "BitMemory.h"
+#include "BlockCompressor.h"
+#include "Common.h"
 #include "DsrcFile.h"
 #include "DsrcIo.h"
 #include "Buffer.h"
@@ -47,6 +50,35 @@ namespace dsrc{
       delete dsrcChunk;
       delete fastqChunk;
       delete reader;
+    }
+
+    /**
+     * Retrieves the next chunk of byte code from the `.dsrc` file and loads it
+     * into a buffer, converts the buffer and returns the content as a string
+     *
+     * This function must be called multiple times in order to obtain whole
+     * content of the input file
+     */
+    std::string DsrcInMemory::getNextChunk(){
+      BlockCompressor superblock(
+        reader->GetDatasetType(),
+        reader->GetCompressionSettings()
+      );
+      if (reader->ReadNextChunk(dsrcChunk)) {
+        BitMemoryReader bitMemory(
+          dsrcChunk->data.Pointer(),
+          dsrcChunk->size
+        );
+        superblock.Read(bitMemory, *fastqChunk);
+        std::string chunkContents = std::string(
+          reinterpret_cast<char const*>(fastqChunk->data.Pointer()),
+          fastqChunk->size
+        );
+        dsrcChunk->Reset();
+        fastqChunk->Reset();
+        return chunkContents;
+      }
+      return "";
     }
   }
 }
