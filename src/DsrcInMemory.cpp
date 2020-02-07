@@ -11,7 +11,7 @@
 #include <iostream>
 
 namespace dsrc{
-  namespace comp {
+  namespace ext {
     /**
      * Creates a pointer to the given .dsrc file to read the buffer contents
      * in chunks

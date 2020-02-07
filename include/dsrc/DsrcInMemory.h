@@ -6,7 +6,7 @@
 #include "../../src/Fastq.h"
 
 namespace dsrc{
-  namespace comp {
+  namespace ext {
 
     /**
      * Utilizes the implementation of DsrcFileReader to read the binary contents
