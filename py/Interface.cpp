@@ -25,6 +25,7 @@
 #include "../include/dsrc/FastqFile.h"
 #include "../include/dsrc/DsrcModule.h"
 #include "../include/dsrc/DsrcArchive.h"
+#include "../include/dsrc/DsrcInMemory.h"
 
 namespace dsrc
 {
@@ -295,6 +296,29 @@ private:
 	DsrcArchiveRecordsReader reader;
 };
 
+class PyDsrcReadInMemory {
+	public:
+		void Open(const std::string& inDsrcFilename_) {
+			dsrcInMemory = new DsrcInMemory(inDsrcFilename_);
+			/**
+			 * @todo Implement TCheckError usage with DsrcInMemory
+			 */
+		}
+
+		void Close() {
+			delete dsrcInMemory;
+			/**
+			 * @todo Implement TCheckError usage with DsrcInMemory
+			 */
+		}
+
+		std::string ReadNextChunk() {
+			return dsrcInMemory->getNextChunk();
+		}
+
+	private:
+		DsrcInMemory * dsrcInMemory;
+};
 
 
 BOOST_PYTHON_MODULE(pydsrc)
@@ -349,6 +373,12 @@ BOOST_PYTHON_MODULE(pydsrc)
 		.def("StartDecompress", &PyDsrcArchiveRecordsReader::StartDecompress)
 		.def("ReadNextRecord", &PyDsrcArchiveRecordsReader::ReadNextRecord)
 		.def("FinishDecompress", &PyDsrcArchiveRecordsReader::FinishDecompress)
+	;
+
+	boo::class_<PyDsrcReadInMemory, boost::noncopyable>("DsrcReadInMemory")
+		.def("Open", &PyDsrcReadInMemory::Open)
+		.def("ReadNextChunk", &PyDsrcReadInMemory::ReadNextChunk)
+		.def("Close", &PyDsrcReadInMemory::Close)
 	;
 }
 
