@@ -7,8 +7,6 @@
 
 namespace dsrc{
   namespace comp {
-    using namespace core;
-    using namespace fq;
 
     /**
      * Utilizes the implementation of DsrcFileReader to read the binary contents
@@ -28,9 +26,9 @@ namespace dsrc{
         std::string getNextChunk();
 
       private:
-        DsrcFileReader* reader = NULL;
-        DsrcDataChunk* dsrcChunk = NULL;
-        FastqDataChunk* fastqChunk = NULL;
+        comp::DsrcFileReader* reader = NULL;
+        comp::DsrcDataChunk* dsrcChunk = NULL;
+        fq::FastqDataChunk* fastqChunk = NULL;
     };
   }
 }

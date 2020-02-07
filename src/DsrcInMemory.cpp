@@ -12,9 +12,6 @@
 
 namespace dsrc{
   namespace comp {
-    using namespace core;
-    using namespace fq;
-
     /**
      * Creates a pointer to the given .dsrc file to read the buffer contents
      * in chunks
@@ -25,10 +22,10 @@ namespace dsrc{
      */
     DsrcInMemory::DsrcInMemory(const std::string& dsrcFilename_) {
       try {
-        reader = new DsrcFileReader();
+        reader = new comp::DsrcFileReader();
         reader->StartDecompress(dsrcFilename_);
-        dsrcChunk = new DsrcDataChunk(DsrcDataChunk::DefaultBufferSize);
-        fastqChunk = new FastqDataChunk(FastqDataChunk::DefaultBufferSize);
+        dsrcChunk = new comp::DsrcDataChunk(comp::DsrcDataChunk::DefaultBufferSize);
+        fastqChunk = new fq::FastqDataChunk(fq::FastqDataChunk::DefaultBufferSize);
       } catch (const DsrcException& e_) {
         /**
          * @todo Implement IsError() functionality? Extend from IDsrcOperator?
@@ -60,12 +57,12 @@ namespace dsrc{
      * content of the input file
      */
     std::string DsrcInMemory::getNextChunk(){
-      BlockCompressor superblock(
+      comp::BlockCompressor superblock(
         reader->GetDatasetType(),
         reader->GetCompressionSettings()
       );
       if (reader->ReadNextChunk(dsrcChunk)) {
-        BitMemoryReader bitMemory(
+        core::BitMemoryReader bitMemory(
           dsrcChunk->data.Pointer(),
           dsrcChunk->size
         );
