@@ -11,6 +11,7 @@ APP_OBJS = DsrcOperator.o \
 	DsrcWorker.o \
 	DsrcIo.o \
 	DsrcFile.o \
+	DsrcInMemory.o \
 	BlockCompressor.o \
 	DnaModelerHuffman.o \
 	QualityPositionModeler.o \
