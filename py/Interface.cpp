@@ -19,6 +19,9 @@
 #include <boost/python/overloads.hpp>
 
 #include <Python.h>
+#include <string>
+#include <sstream>
+#include <vector>
 
 #include "../include/dsrc/Globals.h"
 #include "../include/dsrc/FastqRecord.h"
@@ -321,6 +324,29 @@ class PyDsrcReadInMemory {
 
 	private:
 		DsrcInMemory * dsrcInMemory;
+
+		/**
+		 * C++ does not have a built-in std::string.split() function that tokenizes
+		 * strings on a given delimiter
+		 *
+		 * This implementation is based off of a Stack Overflow implementation:
+		 *
+		 * https://stackoverflow.com/a/236803/10491481
+		 */
+		template <typename Out>
+		void split(const std::string &s, char delim, Out result) {
+			std::istringstream iss(s);
+			std::string item;
+			while (std::getline(iss, item, delim)) {
+				*result++ = item;
+			}
+		}
+
+		std::vector<std::string> split(const std::string &s, char delim) {
+			std::vector<std::string> elems;
+			split(s, delim, std::back_inserter(elems));
+			return elems;
+		}
 
 		std::string ReadNextChunk() {
 			return dsrcInMemory->getNextChunk();
