@@ -312,12 +312,19 @@ class PyDsrcReadInMemory {
 			 */
 		}
 
-		std::string ReadNextChunk() {
-			return dsrcInMemory->getNextChunk();
+		/**
+		 * @todo Return a line from the current chunk
+		 */
+		std::string readline() {
+			return ReadNextChunk();
 		}
 
 	private:
 		DsrcInMemory * dsrcInMemory;
+
+		std::string ReadNextChunk() {
+			return dsrcInMemory->getNextChunk();
+		}
 };
 
 
@@ -377,7 +384,7 @@ BOOST_PYTHON_MODULE(pydsrc)
 
 	boo::class_<PyDsrcReadInMemory, boost::noncopyable>("DsrcReadInMemory")
 		.def("Open", &PyDsrcReadInMemory::Open)
-		.def("ReadNextChunk", &PyDsrcReadInMemory::ReadNextChunk)
+		.def("readline", &PyDsrcReadInMemory::readline)
 		.def("Close", &PyDsrcReadInMemory::Close)
 	;
 }
