@@ -316,14 +316,38 @@ class PyDsrcReadInMemory {
 		}
 
 		/**
-		 * @todo Return a line from the current chunk
+		 * Returns the next line of the opened .dsrc file
+		 *
+		 * Retrieves chunks of the .dsrc file by calling ReadNextChunk, and storing
+		 * each line of the chunk in a Queue
+		 *
+		 * The Queue is accessed for the next line until the Queue is empty, at
+		 * which point the next chunk is retrieved
 		 */
 		std::string readline() {
-			return ReadNextChunk();
+			if (chunk.empty()) {
+				std::string lines = ReadNextChunk();
+				std::vector<std::string> split_lines = split(lines, '\n');
+				if (split_lines.capacity() == 0) {
+					// End of file has been reached
+					return lines;
+				}
+				for (
+					std::vector<std::string>::iterator it = split_lines.begin();
+					it != split_lines.end();
+					++it
+				) {
+					chunk.push(*it + "\n");
+				}
+			}
+			std::string line = chunk.front();
+			chunk.pop();
+			return line;
 		}
 
 	private:
 		DsrcInMemory * dsrcInMemory;
+		std::queue<std::string> chunk;
 
 		/**
 		 * C++ does not have a built-in std::string.split() function that tokenizes
