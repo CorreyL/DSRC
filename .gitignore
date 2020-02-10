@@ -5,6 +5,8 @@
 !*/
 # DO NOT blacklist any filename with an extension
 !*.*
+!Jamroot
+!Jamfile
 .DS_Store
 *.o
 bin/
