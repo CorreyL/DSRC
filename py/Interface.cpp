@@ -383,9 +383,9 @@ BOOST_PYTHON_MODULE(pydsrc)
 	;
 
 	boo::class_<PyDsrcReadInMemory, boost::noncopyable>("DsrcReadInMemory")
-		.def("Open", &PyDsrcReadInMemory::Open)
+		.def("open", &PyDsrcReadInMemory::Open)
 		.def("readline", &PyDsrcReadInMemory::readline)
-		.def("Close", &PyDsrcReadInMemory::Close)
+		.def("close", &PyDsrcReadInMemory::Close)
 	;
 }
 
