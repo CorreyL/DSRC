@@ -313,6 +313,7 @@ class PyDsrcReadInMemory {
 			/**
 			 * @todo Implement TCheckError usage with DsrcInMemory
 			 */
+			dsrcInMemory = NULL;
 		}
 
 		/**
@@ -345,8 +346,12 @@ class PyDsrcReadInMemory {
 			return line;
 		}
 
+		bool closed() {
+			return dsrcInMemory == NULL;
+		}
+
 	private:
-		DsrcInMemory * dsrcInMemory;
+		DsrcInMemory * dsrcInMemory = NULL;
 		std::queue<std::string> chunk;
 
 		/**
@@ -436,6 +441,7 @@ BOOST_PYTHON_MODULE(pydsrc)
 		.def("open", &PyDsrcReadInMemory::Open)
 		.def("readline", &PyDsrcReadInMemory::readline)
 		.def("close", &PyDsrcReadInMemory::Close)
+		.def("closed", &PyDsrcReadInMemory::closed)
 	;
 }
 
