@@ -27,6 +27,7 @@ namespace dsrc{
         bool IsError() const;
         void AddError(const std::string& err_);
         void ClearError();
+        std::string GetError();
 
       private:
         comp::DsrcFileReader* reader = NULL;

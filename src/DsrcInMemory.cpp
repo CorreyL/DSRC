@@ -89,5 +89,9 @@ namespace dsrc{
     void DsrcInMemory::ClearError() {
       errorMsg.clear();
     }
+
+    std::string DsrcInMemory::GetError() {
+      return errorMsg;
+    }
   }
 }
