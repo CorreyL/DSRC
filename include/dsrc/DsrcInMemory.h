@@ -32,7 +32,7 @@ namespace dsrc{
         comp::DsrcFileReader* reader = NULL;
         comp::DsrcDataChunk* dsrcChunk = NULL;
         fq::FastqDataChunk* fastqChunk = NULL;
-        std::string errorMsg = "";
+        std::string errorMsg;
     };
   }
 }
