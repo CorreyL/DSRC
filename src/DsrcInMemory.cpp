@@ -77,5 +77,17 @@ namespace dsrc{
       }
       return "";
     }
+
+    bool DsrcInMemory::IsError() const {
+      return errorMsg.length() > 0;
+    }
+
+    void DsrcInMemory::AddError(const std::string& err_) {
+      errorMsg += "Error: " + err_ + '\n';
+    }
+
+    void DsrcInMemory::ClearError() {
+      errorMsg.clear();
+    }
   }
 }

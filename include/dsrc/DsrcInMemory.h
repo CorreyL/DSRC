@@ -24,11 +24,15 @@ namespace dsrc{
         DsrcInMemory(const std::string& dsrcFilename_);
         ~DsrcInMemory();
         std::string getNextChunk();
+        bool IsError() const;
+        void AddError(const std::string& err_);
+        void ClearError();
 
       private:
         comp::DsrcFileReader* reader = NULL;
         comp::DsrcDataChunk* dsrcChunk = NULL;
         fq::FastqDataChunk* fastqChunk = NULL;
+        std::string errorMsg = "";
     };
   }
 }
