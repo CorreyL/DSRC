@@ -37,9 +37,13 @@ namespace dsrc{
      * for each pointer
      */
     DsrcInMemory::~DsrcInMemory() {
-      dsrcChunk->Reset();
-      fastqChunk->Reset();
-      reader->FinishDecompress();
+      try {
+        dsrcChunk->Reset();
+        fastqChunk->Reset();
+        reader->FinishDecompress();
+      } catch (const DsrcException& e_) {
+        AddError(e_.what());
+      }
       delete dsrcChunk;
       delete fastqChunk;
       delete reader;
