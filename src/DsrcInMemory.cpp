@@ -27,11 +27,7 @@ namespace dsrc{
         dsrcChunk = new comp::DsrcDataChunk(comp::DsrcDataChunk::DefaultBufferSize);
         fastqChunk = new fq::FastqDataChunk(fq::FastqDataChunk::DefaultBufferSize);
       } catch (const DsrcException& e_) {
-        /**
-         * @todo Implement IsError() functionality? Extend from IDsrcOperator?
-         */
-        std::cerr << e_.what() << std::endl;
-        exit(1);
+        AddError(e_.what());
       }
     }
 
