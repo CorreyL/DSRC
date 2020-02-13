@@ -365,13 +365,22 @@ class PyDsrcReadInMemory {
 		 * ensuring argument types match between C++ and Python when the function
 		 * is invoked
 		 */
-		void __exit__(
+		void __exit__no_error(
 			void* exceptionType,
 			void* exceptionValue,
 			void* traceback
 		) {
 			Close();
 		}
+
+		void __exit__error(
+			PyObject* exceptionType,
+			PyObject* exceptionValue,
+			PyObject* traceback
+		) {
+			Close();
+		}
+
 
 	private:
 		DsrcInMemory * dsrcInMemory = NULL;
@@ -468,7 +477,8 @@ BOOST_PYTHON_MODULE(pydsrc)
 		.def("close", &PyDsrcReadInMemory::Close)
 		.def("closed", &PyDsrcReadInMemory::closed)
 		.def("__enter__", &PyDsrcReadInMemory::__enter__)
-		.def("__exit__", &PyDsrcReadInMemory::__exit__)
+		.def("__exit__", &PyDsrcReadInMemory::__exit__no_error)
+		.def("__exit__", &PyDsrcReadInMemory::__exit__error)
 	;
 }
 
