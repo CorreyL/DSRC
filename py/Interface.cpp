@@ -303,16 +303,12 @@ class PyDsrcReadInMemory {
 	public:
 		void Open(const std::string& inDsrcFilename_) {
 			dsrcInMemory = new DsrcInMemory(inDsrcFilename_);
-			/**
-			 * @todo Implement TCheckError usage with DsrcInMemory
-			 */
+			TCheckError(dsrcInMemory);
 		}
 
 		void Close() {
 			delete dsrcInMemory;
-			/**
-			 * @todo Implement TCheckError usage with DsrcInMemory
-			 */
+			TCheckError(dsrcInMemory);
 			dsrcInMemory = NULL;
 		}
 
@@ -378,7 +374,9 @@ class PyDsrcReadInMemory {
 		}
 
 		std::string ReadNextChunk() {
-			return dsrcInMemory->getNextChunk();
+			std::string chunk = dsrcInMemory->getNextChunk();
+			TCheckError(dsrcInMemory);
+			return chunk;
 		}
 };
 
