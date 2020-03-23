@@ -356,6 +356,32 @@ class PyDsrcReadInMemory {
 			return dsrcInMemory == NULL;
 		}
 
+		PyDsrcReadInMemory __enter__() {
+			return *this;
+		}
+
+		/**
+		 * Arguments are typed as `void*` to simulate the `NoneType` type in Python,
+		 * ensuring argument types match between C++ and Python when the function
+		 * is invoked
+		 */
+		void __exit__no_error(
+			void* exceptionType,
+			void* exceptionValue,
+			void* traceback
+		) {
+			Close();
+		}
+
+		void __exit__error(
+			PyObject* exceptionType,
+			PyObject* exceptionValue,
+			PyObject* traceback
+		) {
+			Close();
+		}
+
+
 	private:
 		DsrcInMemory * dsrcInMemory = NULL;
 		std::queue<std::string> chunk;
@@ -445,11 +471,14 @@ BOOST_PYTHON_MODULE(pydsrc)
 		.def("FinishDecompress", &PyDsrcArchiveRecordsReader::FinishDecompress)
 	;
 
-	boo::class_<PyDsrcReadInMemory, boost::noncopyable>("DsrcReadInMemory")
+	boo::class_<PyDsrcReadInMemory>("DsrcReadInMemory")
 		.def("open", &PyDsrcReadInMemory::Open)
 		.def("readline", &PyDsrcReadInMemory::readline)
 		.def("close", &PyDsrcReadInMemory::Close)
 		.def("closed", &PyDsrcReadInMemory::closed)
+		.def("__enter__", &PyDsrcReadInMemory::__enter__)
+		.def("__exit__", &PyDsrcReadInMemory::__exit__no_error)
+		.def("__exit__", &PyDsrcReadInMemory::__exit__error)
 	;
 }
 
