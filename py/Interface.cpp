@@ -70,6 +70,16 @@ void TCheckError(_T& obj_)
 	}
 }
 
+template <class _T>
+void TCheckPtrError(_T*& obj_)
+{
+	if (obj_->IsError())
+	{
+		std::string err = obj_->GetError();
+		obj_->ClearError();
+		throw PyException(err);
+	}
+}
 
 // Compression settings
 //
@@ -303,16 +313,12 @@ class PyDsrcReadInMemory {
 	public:
 		void Open(const std::string& inDsrcFilename_) {
 			dsrcInMemory = new DsrcInMemory(inDsrcFilename_);
-			/**
-			 * @todo Implement TCheckError usage with DsrcInMemory
-			 */
+			TCheckPtrError(dsrcInMemory);
 		}
 
 		void Close() {
 			delete dsrcInMemory;
-			/**
-			 * @todo Implement TCheckError usage with DsrcInMemory
-			 */
+			TCheckPtrError(dsrcInMemory);
 			dsrcInMemory = NULL;
 		}
 
@@ -378,7 +384,9 @@ class PyDsrcReadInMemory {
 		}
 
 		std::string ReadNextChunk() {
-			return dsrcInMemory->getNextChunk();
+			std::string chunk = dsrcInMemory->getNextChunk();
+			TCheckPtrError(dsrcInMemory);
+			return chunk;
 		}
 };
 

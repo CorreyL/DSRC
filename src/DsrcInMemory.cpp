@@ -27,11 +27,7 @@ namespace dsrc{
         dsrcChunk = new comp::DsrcDataChunk(comp::DsrcDataChunk::DefaultBufferSize);
         fastqChunk = new fq::FastqDataChunk(fq::FastqDataChunk::DefaultBufferSize);
       } catch (const DsrcException& e_) {
-        /**
-         * @todo Implement IsError() functionality? Extend from IDsrcOperator?
-         */
-        std::cerr << e_.what() << std::endl;
-        exit(1);
+        AddError(e_.what());
       }
     }
 
@@ -41,9 +37,13 @@ namespace dsrc{
      * for each pointer
      */
     DsrcInMemory::~DsrcInMemory() {
-      dsrcChunk->Reset();
-      fastqChunk->Reset();
-      reader->FinishDecompress();
+      try {
+        dsrcChunk->Reset();
+        fastqChunk->Reset();
+        reader->FinishDecompress();
+      } catch (const DsrcException& e_) {
+        AddError(e_.what());
+      }
       delete dsrcChunk;
       delete fastqChunk;
       delete reader;
@@ -76,6 +76,22 @@ namespace dsrc{
         return chunkContents;
       }
       return "";
+    }
+
+    bool DsrcInMemory::IsError() const {
+      return errorMsg.length() > 0;
+    }
+
+    void DsrcInMemory::AddError(const std::string& err_) {
+      errorMsg += "Error: " + err_ + '\n';
+    }
+
+    void DsrcInMemory::ClearError() {
+      errorMsg.clear();
+    }
+
+    std::string DsrcInMemory::GetError() {
+      return errorMsg;
     }
   }
 }
