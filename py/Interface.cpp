@@ -19,12 +19,16 @@
 #include <boost/python/overloads.hpp>
 
 #include <Python.h>
+#include <string>
+#include <sstream>
+#include <vector>
 
 #include "../include/dsrc/Globals.h"
 #include "../include/dsrc/FastqRecord.h"
 #include "../include/dsrc/FastqFile.h"
 #include "../include/dsrc/DsrcModule.h"
 #include "../include/dsrc/DsrcArchive.h"
+#include "../include/dsrc/DsrcInMemory.h"
 
 namespace dsrc
 {
@@ -295,6 +299,88 @@ private:
 	DsrcArchiveRecordsReader reader;
 };
 
+class PyDsrcReadInMemory {
+	public:
+		void Open(const std::string& inDsrcFilename_) {
+			dsrcInMemory = new DsrcInMemory(inDsrcFilename_);
+			/**
+			 * @todo Implement TCheckError usage with DsrcInMemory
+			 */
+		}
+
+		void Close() {
+			delete dsrcInMemory;
+			/**
+			 * @todo Implement TCheckError usage with DsrcInMemory
+			 */
+			dsrcInMemory = NULL;
+		}
+
+		/**
+		 * Returns the next line of the opened .dsrc file
+		 *
+		 * Retrieves chunks of the .dsrc file by calling ReadNextChunk, and storing
+		 * each line of the chunk in a Queue
+		 *
+		 * The Queue is accessed for the next line until the Queue is empty, at
+		 * which point the next chunk is retrieved
+		 */
+		std::string readline() {
+			if (chunk.empty()) {
+				std::string lines = ReadNextChunk();
+				std::vector<std::string> split_lines = split(lines, '\n');
+				if (split_lines.capacity() == 0) {
+					// End of file has been reached
+					return lines;
+				}
+				for (
+					std::vector<std::string>::iterator it = split_lines.begin();
+					it != split_lines.end();
+					++it
+				) {
+					chunk.push(*it + "\n");
+				}
+			}
+			std::string line = chunk.front();
+			chunk.pop();
+			return line;
+		}
+
+		bool closed() {
+			return dsrcInMemory == NULL;
+		}
+
+	private:
+		DsrcInMemory * dsrcInMemory = NULL;
+		std::queue<std::string> chunk;
+
+		/**
+		 * C++ does not have a built-in std::string.split() function that tokenizes
+		 * strings on a given delimiter
+		 *
+		 * This implementation is based off of a Stack Overflow implementation:
+		 *
+		 * https://stackoverflow.com/a/236803/10491481
+		 */
+		template <typename Out>
+		void split(const std::string &s, char delim, Out result) {
+			std::istringstream iss(s);
+			std::string item;
+			while (std::getline(iss, item, delim)) {
+				*result++ = item;
+			}
+		}
+
+		std::vector<std::string> split(const std::string &s, char delim) {
+			std::vector<std::string> elems;
+			split(s, delim, std::back_inserter(elems));
+			return elems;
+		}
+
+		std::string ReadNextChunk() {
+			return dsrcInMemory->getNextChunk();
+		}
+};
 
 
 BOOST_PYTHON_MODULE(pydsrc)
@@ -349,6 +435,13 @@ BOOST_PYTHON_MODULE(pydsrc)
 		.def("StartDecompress", &PyDsrcArchiveRecordsReader::StartDecompress)
 		.def("ReadNextRecord", &PyDsrcArchiveRecordsReader::ReadNextRecord)
 		.def("FinishDecompress", &PyDsrcArchiveRecordsReader::FinishDecompress)
+	;
+
+	boo::class_<PyDsrcReadInMemory, boost::noncopyable>("DsrcReadInMemory")
+		.def("open", &PyDsrcReadInMemory::Open)
+		.def("readline", &PyDsrcReadInMemory::readline)
+		.def("close", &PyDsrcReadInMemory::Close)
+		.def("closed", &PyDsrcReadInMemory::closed)
 	;
 }
 
