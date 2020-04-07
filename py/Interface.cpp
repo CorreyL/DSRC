@@ -322,6 +322,13 @@ class PyDsrcReadInMemory {
 			delete dsrcInMemory;
 			TCheckPtrError(dsrcInMemory);
 			dsrcInMemory = NULL;
+			/**
+			 * Create an empty queue<string> and swap it with `chunk` for an O(1)
+			 * operation to empty the queue of lines that were last read from the
+			 * `.dsrc` file
+			 */
+			std::queue<std::string> empty;
+			std::swap(chunk, empty);
 		}
 
 		/**
