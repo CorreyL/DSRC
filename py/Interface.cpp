@@ -341,6 +341,9 @@ class PyDsrcReadInMemory {
 		 * which point the next chunk is retrieved
 		 */
 		std::string readline() {
+			if (closed()) {
+				throw PyException("I/O operation on closed file.");
+			}
 			if (chunk.empty()) {
 				std::string lines = ReadNextChunk();
 				std::vector<std::string> split_lines = split(lines, '\n');
