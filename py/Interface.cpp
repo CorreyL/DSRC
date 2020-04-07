@@ -17,6 +17,7 @@
 #include <boost/python/exception_translator.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include <boost/python/overloads.hpp>
+#include <boost/python/return_internal_reference.hpp>
 
 #include <Python.h>
 #include <string>
@@ -356,7 +357,7 @@ class PyDsrcReadInMemory {
 			return dsrcInMemory == NULL;
 		}
 
-		PyDsrcReadInMemory __enter__() {
+		PyDsrcReadInMemory & __enter__() {
 			return *this;
 		}
 
@@ -476,7 +477,7 @@ BOOST_PYTHON_MODULE(pydsrc)
 		.def("readline", &PyDsrcReadInMemory::readline)
 		.def("close", &PyDsrcReadInMemory::Close)
 		.def("closed", &PyDsrcReadInMemory::closed)
-		.def("__enter__", &PyDsrcReadInMemory::__enter__)
+		.def("__enter__", &PyDsrcReadInMemory::__enter__, boo::return_internal_reference<>())
 		.def("__exit__", &PyDsrcReadInMemory::__exit__no_error)
 		.def("__exit__", &PyDsrcReadInMemory::__exit__error)
 	;
