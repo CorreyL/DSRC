@@ -312,9 +312,10 @@ private:
 
 class PyDsrcReadInMemory {
 	public:
-		void Open(const std::string& inDsrcFilename_) {
+		PyDsrcReadInMemory & Open(const std::string& inDsrcFilename_) {
 			dsrcInMemory = new DsrcInMemory(inDsrcFilename_);
 			TCheckPtrError(dsrcInMemory);
+			return *this;
 		}
 
 		void Close() {
@@ -473,7 +474,7 @@ BOOST_PYTHON_MODULE(pydsrc)
 	;
 
 	boo::class_<PyDsrcReadInMemory>("DsrcReadInMemory")
-		.def("open", &PyDsrcReadInMemory::Open)
+		.def("open", &PyDsrcReadInMemory::Open, boo::return_internal_reference<>())
 		.def("readline", &PyDsrcReadInMemory::readline)
 		.def("close", &PyDsrcReadInMemory::Close)
 		.def("closed", &PyDsrcReadInMemory::closed)
