@@ -17,6 +17,7 @@
 #include <boost/python/exception_translator.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include <boost/python/overloads.hpp>
+#include <boost/python/return_internal_reference.hpp>
 
 #include <Python.h>
 #include <string>
@@ -311,15 +312,23 @@ private:
 
 class PyDsrcReadInMemory {
 	public:
-		void Open(const std::string& inDsrcFilename_) {
+		PyDsrcReadInMemory & Open(const std::string& inDsrcFilename_) {
 			dsrcInMemory = new DsrcInMemory(inDsrcFilename_);
 			TCheckPtrError(dsrcInMemory);
+			return *this;
 		}
 
 		void Close() {
 			delete dsrcInMemory;
 			TCheckPtrError(dsrcInMemory);
 			dsrcInMemory = NULL;
+			/**
+			 * Create an empty queue<string> and swap it with `chunk` for an O(1)
+			 * operation to empty the queue of lines that were last read from the
+			 * `.dsrc` file
+			 */
+			std::queue<std::string> empty;
+			std::swap(chunk, empty);
 		}
 
 		/**
@@ -332,6 +341,9 @@ class PyDsrcReadInMemory {
 		 * which point the next chunk is retrieved
 		 */
 		std::string readline() {
+			if (closed()) {
+				throw PyException("I/O operation on closed file.");
+			}
 			if (chunk.empty()) {
 				std::string lines = ReadNextChunk();
 				std::vector<std::string> split_lines = split(lines, '\n');
@@ -356,7 +368,7 @@ class PyDsrcReadInMemory {
 			return dsrcInMemory == NULL;
 		}
 
-		PyDsrcReadInMemory __enter__() {
+		PyDsrcReadInMemory & __enter__() {
 			return *this;
 		}
 
@@ -472,11 +484,11 @@ BOOST_PYTHON_MODULE(pydsrc)
 	;
 
 	boo::class_<PyDsrcReadInMemory>("DsrcReadInMemory")
-		.def("open", &PyDsrcReadInMemory::Open)
+		.def("open", &PyDsrcReadInMemory::Open, boo::return_internal_reference<>())
 		.def("readline", &PyDsrcReadInMemory::readline)
 		.def("close", &PyDsrcReadInMemory::Close)
 		.def("closed", &PyDsrcReadInMemory::closed)
-		.def("__enter__", &PyDsrcReadInMemory::__enter__)
+		.def("__enter__", &PyDsrcReadInMemory::__enter__, boo::return_internal_reference<>())
 		.def("__exit__", &PyDsrcReadInMemory::__exit__no_error)
 		.def("__exit__", &PyDsrcReadInMemory::__exit__error)
 	;
